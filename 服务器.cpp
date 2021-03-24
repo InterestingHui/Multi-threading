@@ -3,6 +3,21 @@
 #pragma comment(lib,"ws2_32.lib")
 #include<Windows.h>
 
+//客户端的socket 
+SOCKET clientSocket[100];
+
+void func(int i){
+	//7 通信
+	char buf[1024];
+	while (1){
+		//等待从客户端接收数据
+		int r = recv(clientSocket[i], buf, 1023, NULL);
+		if (r > 0){
+			buf[r] = 0;//添加结束符号
+			printf("来自客户端%d的信息:%s\n",i+1, buf);
+		}
+	}
+}
 int main(){
 	//1 确定协议版本
 	WSADATA wsaData;
@@ -50,25 +65,23 @@ int main(){
 	int len = sizeof(cAddr);
 
 	//accept是一个阻塞函数，类似于scanf、getchar
-	SOCKET clientSocket = accept(serverSocket, (sockaddr*)&cAddr, &len);//接听
-	if (SOCKET_ERROR == clientSocket){
-		printf("服务器崩溃:%d\n", GetLastError());
-		closesocket(serverSocket);
-		WSACleanup();
-		return -1;
-	}
-	printf("客户端连接服务器成功:%s\n", inet_ntoa(cAddr.sin_addr));
-
-	//7 通信
-	char buf[1024];
-	while (1){
-		//等待从客户端接收数据
-		r = recv(clientSocket, buf, 1023, NULL);
-		if (r > 0){
-			buf[r] = 0;//添加结束符号
-			printf("来自客户端的信息:%s\n", buf);
+	for (int i = 0; i <= 100; i++){
+		clientSocket[i] = accept(serverSocket, (sockaddr*)&cAddr, &len);//接听
+		if (SOCKET_ERROR == clientSocket[i]){
+			printf("服务器崩溃:%d\n", GetLastError());
+			closesocket(serverSocket);
+			WSACleanup();
+			return -1;
 		}
+		printf("客户端%d连接服务器成功:%s\n",i+1, inet_ntoa(cAddr.sin_addr));
+		
+		//创建线程
+		CreateThread(NULL, NULL,
+			(LPTHREAD_START_ROUTINE)func,(LPVOID)i,
+			NULL, NULL);
 	}
+	
+	
 
 
 
