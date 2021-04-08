@@ -9,7 +9,7 @@
 <details><summary><b>服务器</b></summary>
   
 - 1.通过WSAStartup函数确认协议版本
-- 2.通过socket函数创建socket变量
+- 2.通过socket函数创建服务器socket变量
 - 3.设置服务器协议地址簇，通过声明一个sock_address_in变量，就是大写的SOCKADDR_IN变量，然后设置网络地址就是本地的局域网IP，再设置端口号
 - 4.通过bind函数绑定第二步创建的socket和第三步设置的服务器协议地址簇变量
 - 5.通过listen函数让socket变量监听，同时设置最大允许连接的客户端数量
