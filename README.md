@@ -23,8 +23,34 @@
 - 7.之后就是通过closesocket断开连接，还有WSACleanup清理协议版本信息
 </details>
 
----
-
+<details><summary>客户端和模拟聊天</summary>
+  
 - 然后客户端的做的事情就是比服务端少了绑定和监听，直接连接服务器就行了
 - 然后模拟聊天的过程就是就是，先点开服务器的exe执行程序，再点开多个客户端程序的exe执行程序，每点一个客户端exe程序，在服务器窗口上就会显示已连接一个客户端，然后我们就可以在客户端exe窗口上输入文字，就会在服务器exe窗口上打印出来，当然事先要准备好足够多的客户端socket数组，不然超过最大连接客户端数就会出错。
+</details>
 
+---
+### 面试问题
+<details><summary>1.对于socket编程accept方法是干嘛的（三次握手在什么地方、说服务器和客户端是怎么连接的、连接的关键过程）</summary>
+
+- accept函数是用于接受客户端的请求的
+- 连接的关键过程
+    - 首先是服务器调用listen进行监听
+    - 然后客户端调用connect来发送syn报文
+    - 之后服务器的协议栈负责三次握手的交互过程，建立连接。连接建立后，往listen队列中添加一个成功的连接，知道队列的最大长度
+    - 再然后服务器调用accept从listen队列中取出一条成功的tcp连接，listen队列中的连接个数就少一个，然后程序就可以看到自己与用户的通信 
+</details>
+<details><summary>2.你知道epoll吗（注意读音！），能详细讲讲吗，以及它和select的区别</summary>
+</details>
+<details><summary>3.socket中recv函数的返回值及意义</summary>
+
+- recv先等待socket的发送缓冲区中的数据被协议传送完毕，如果协议在传送socket的发送缓冲区中的数据时出现网络错误，那么recv函数返回SOCKET_ERROR
+- 如果socket的发送缓冲区中没有数据或者数据被协议成功发送完毕后，recv先检查套接字socket的接收缓冲区
+- 如果接收缓冲区中没有数据或者协议正在接收数据，那么recv就一直等待，直到协议把数据接收完毕。
+- 当协议把数据接收完毕，rec函数就把socket的接收缓冲区中的数据copy到buffer中，注意:
+    - 协议收到的数据可能大于buf的长度，所以在这种情况下要调用几次recv函数才能把socket的接收缓冲区中的数据copy完。
+    - recv函数仅仅是copy数据，真正的接收数据是协议来完成的 
+- recv函数返回copy的字节数
+- 如果recv在copy时出错，你们它返回SOCKET_ERROR
+- 如果recv在等待协议接收数据时中断了，那么它返回0
+</details>
